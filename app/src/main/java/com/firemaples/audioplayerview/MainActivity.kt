@@ -35,18 +35,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        seekBar2.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                audioPlayerView.updateProgressButtonDegree(progress.toFloat())
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-        })
-
         sw_replyMode.setOnCheckedChangeListener { _, checked ->
             if (checked)
                 audioPlayerView.updateRadius(0, 0, 18, 18)

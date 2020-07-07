@@ -4,11 +4,17 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 
 class AudioPlayerView : View {
+    private companion object {
+        private const val progressButtonUpdateInterval = 1000L / 8L
+    }
+
     private var progressColor: String = "#4c5acff2"
     private var buttonBgColor: String = "#5acff2"
     private var buttonColor: String = "#ffffff"
@@ -57,6 +63,7 @@ class AudioPlayerView : View {
             }
         }
     private var progressButtonDegree: Float = 0f
+    private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -76,11 +83,9 @@ class AudioPlayerView : View {
     fun updateButtonState(buttonState: ButtonState) {
         this.buttonState = buttonState
         postInvalidate()
-    }
-
-    fun updateProgressButtonDegree(degree: Float) {
-        this.progressButtonDegree = degree.coerceAtLeast(0f).coerceAtMost(360f)
-        postInvalidate()
+        if (buttonState == ButtonState.Progress) {
+            startProgressAnimation()
+        }
     }
 
     fun updateRadius(
@@ -96,6 +101,21 @@ class AudioPlayerView : View {
         postInvalidate()
     }
 
+    private fun startProgressAnimation() {
+        mainHandler.postDelayed({
+            if (getCurrentButtonState() != ButtonState.Progress) return@postDelayed
+
+            progressButtonDegree += 360 / 8
+            if (progressButtonDegree >= 360) progressButtonDegree %= 360
+
+            postInvalidate()
+
+            if (getCurrentButtonState() == ButtonState.Progress) {
+                startProgressAnimation()
+            }
+        }, progressButtonUpdateInterval)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -106,14 +126,6 @@ class AudioPlayerView : View {
         drawButton(canvas)
 
         drawText(canvas, "00:06")
-
-//        drawTest(canvas)
-
-    }
-
-    private fun drawTest(canvas: Canvas) {
-
-        canvas.drawRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), progressPaint)
     }
 
     private fun clipRegion(canvas: Canvas) {
