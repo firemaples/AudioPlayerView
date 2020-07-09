@@ -8,17 +8,19 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
 
 class AudioPlayerView : View {
     private companion object {
         private const val progressButtonUpdateInterval = 1000L / 8L
     }
 
-    private var progressColor: String = "#4c5acff2"
-    private var buttonBgColor: String = "#5acff2"
-    private var buttonColor: String = "#ffffff"
-    private var textColor: String = "#000000"
+    private var progressColor: Int = Color.parseColor("#4c5acff2")
+    private var buttonBgColor: Int = Color.parseColor("#5acff2")
+    private var buttonIconColor: Int = Color.parseColor("#ffffff")
+    private var textColor: Int = Color.parseColor("#000000")
+    private var progressButtonFilterColor: Int = -1
+
+    private var progressButtonDrawable: Drawable? = null
 
     private var buttonBgSize: Float = 22.toPx()
     private var buttonSize: Float = 10.toPx()
@@ -29,49 +31,93 @@ class AudioPlayerView : View {
     private var progress: Float = 0.5f
     private var buttonState: ButtonState = ButtonState.Play
 
-    //    private var drawingTopLeftRadius: Float = 18.toDp()
-//    private var drawingTopRightRadius: Float = 18.toDp()
     private var drawingTopLeftRadius: Float = 0f
     private var drawingTopRightRadius: Float = 0f
-    private var drawingBottomRightRadius: Float = 18.toPx()
-    private var drawingBottomLeftRadius: Float = 18.toPx()
+    private var drawingBottomRightRadius: Float = 0f
+    private var drawingBottomLeftRadius: Float = 0f
 
     private val progressPaint: Paint = Paint().apply {
-        color = Color.parseColor(progressColor)
+        color = progressColor
     }
     private val buttonBgPaint: Paint = Paint().apply {
-        color = Color.parseColor(buttonBgColor)
+        color = buttonBgColor
     }
     private val buttonPaint: Paint = Paint().apply {
-        color = Color.parseColor(buttonColor)
+        color = buttonIconColor
     }
     private val textPaint: Paint = Paint().apply {
-        color = Color.parseColor(textColor)
+        color = textColor
         textSize = this@AudioPlayerView.textSize
         isAntiAlias = true
     }
 
-    private val progressDrawable: Drawable? =
-        ContextCompat.getDrawable(context, R.drawable.progress)?.apply {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                colorFilter = PorterDuffColorFilter(
-                    Color.WHITE,
-                    PorterDuff.Mode.SRC_ATOP
-                )
-            } else {
-                setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
-            }
-        }
     private var progressButtonDegree: Float = 0f
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
     constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        if (context != null && attrs != null) initAttrs(context, attrs)
+    }
+
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
         defStyleAttr
-    )
+    ) {
+        if (context != null && attrs != null) initAttrs(context, attrs)
+    }
+
+    private fun initAttrs(context: Context, attrs: AttributeSet) {
+        val a = context.obtainStyledAttributes(attrs, R.styleable.AudioPlayerView)
+
+        progressColor =
+            a.getColor(R.styleable.AudioPlayerView_ap_progressColor, progressColor)
+        buttonBgColor =
+            a.getColor(R.styleable.AudioPlayerView_ap_buttonBackgroundColor, buttonBgColor)
+        buttonIconColor =
+            a.getColor(R.styleable.AudioPlayerView_ap_buttonIconColor, buttonIconColor)
+        textColor = a.getColor(R.styleable.AudioPlayerView_ap_textColor, textColor)
+
+        progressButtonFilterColor =
+            a.getColor(
+                R.styleable.AudioPlayerView_ap_progressButtonFilterColor,
+                progressButtonFilterColor
+            )
+        a.getDrawable(R.styleable.AudioPlayerView_ap_progressButtonDrawable)?.also {
+            setProgressDrawable(it, progressButtonFilterColor)
+        }
+
+        drawingTopLeftRadius =
+            a.getDimensionPixelSize(R.styleable.AudioPlayerView_ap_drawingTopLeftRadius, 0)
+                .toFloat()
+        drawingTopRightRadius =
+            a.getDimensionPixelSize(R.styleable.AudioPlayerView_ap_drawingTopRightRadius, 0)
+                .toFloat()
+        drawingBottomLeftRadius =
+            a.getDimensionPixelSize(R.styleable.AudioPlayerView_ap_drawingBottomLeftRadius, 0)
+                .toFloat()
+        drawingBottomRightRadius =
+            a.getDimensionPixelSize(R.styleable.AudioPlayerView_ap_drawingBottomRightRadius, 0)
+                .toFloat()
+
+        a.recycle()
+    }
+
+    fun setProgressDrawable(progressDrawable: Drawable, filterColor: Int = -1) {
+        this.progressButtonDrawable = progressDrawable.apply {
+            val color = if (filterColor >= 0) filterColor else progressButtonFilterColor
+            if (color >= 0) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    colorFilter = PorterDuffColorFilter(
+                        color,
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                } else {
+                    setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+                }
+            }
+        }
+    }
 
     fun updateProgress(progress: Float) {
         this.progress = progress.coerceAtMost(1f).coerceAtLeast(0f)
@@ -207,6 +253,7 @@ class AudioPlayerView : View {
                 canvas.drawPath(path, buttonPaint)
             }
             ButtonState.Progress -> {
+                val progressDrawable = progressButtonDrawable
                 if (progressDrawable != null) {
                     progressDrawable.setBounds(
                         btRect.left.toInt(),

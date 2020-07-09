@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AudioPlayerView">
+        <attr name="ap_progressColor" format="color" />
+        <attr name="ap_buttonBackgroundColor" format="color" />
+        <attr name="ap_buttonIconColor" format="color" />
+        <attr name="ap_textColor" format="color" />
+        <attr name="ap_progressButtonDrawable" format="reference" />
+        <attr name="ap_progressButtonFilterColor" format="color" />
+        <attr name="ap_drawingTopLeftRadius" format="dimension" />
+        <attr name="ap_drawingTopRightRadius" format="dimension" />
+        <attr name="ap_drawingBottomLeftRadius" format="dimension" />
+        <attr name="ap_drawingBottomRightRadius" format="dimension" />
+    </declare-styleable>
+</resources>
