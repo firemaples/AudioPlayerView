@@ -12,12 +12,12 @@ import android.view.View
 class AudioPlayerView : View {
     private companion object {
         private const val progressButtonUpdateInterval = 1000L / 8L
+        private val defaultProgressColor: Int = Color.parseColor("#4c5acff2")
+        private val defaultButtonBgColor: Int = Color.parseColor("#5acff2")
+        private val defaultButtonIconColor: Int = Color.parseColor("#ffffff")
+        private val defaultTextColor: Int = Color.parseColor("#000000")
     }
 
-    private var progressColor: Int = Color.parseColor("#4c5acff2")
-    private var buttonBgColor: Int = Color.parseColor("#5acff2")
-    private var buttonIconColor: Int = Color.parseColor("#ffffff")
-    private var textColor: Int = Color.parseColor("#000000")
     private var progressButtonFilterColor: Int = -1
 
     private var progressButtonDrawable: Drawable? = null
@@ -37,17 +37,17 @@ class AudioPlayerView : View {
     private var drawingBottomRightRadius: Float = 0f
     private var drawingBottomLeftRadius: Float = 0f
 
-    private val progressPaint: Paint = Paint().apply {
-        color = progressColor
+    private var progressPaint: Paint = Paint().apply {
+        color = defaultProgressColor
     }
-    private val buttonBgPaint: Paint = Paint().apply {
-        color = buttonBgColor
+    private var buttonBgPaint: Paint = Paint().apply {
+        color = defaultButtonBgColor
     }
-    private val buttonPaint: Paint = Paint().apply {
-        color = buttonIconColor
+    private var buttonIconPaint: Paint = Paint().apply {
+        color = defaultButtonIconColor
     }
-    private val textPaint: Paint = Paint().apply {
-        color = textColor
+    private var textPaint: Paint = Paint().apply {
+        color = defaultTextColor
         textSize = this@AudioPlayerView.textSize
         isAntiAlias = true
     }
@@ -71,13 +71,14 @@ class AudioPlayerView : View {
     private fun initAttrs(context: Context, attrs: AttributeSet) {
         val a = context.obtainStyledAttributes(attrs, R.styleable.AudioPlayerView)
 
-        progressColor =
-            a.getColor(R.styleable.AudioPlayerView_ap_progressColor, progressColor)
-        buttonBgColor =
-            a.getColor(R.styleable.AudioPlayerView_ap_buttonBackgroundColor, buttonBgColor)
-        buttonIconColor =
-            a.getColor(R.styleable.AudioPlayerView_ap_buttonIconColor, buttonIconColor)
-        textColor = a.getColor(R.styleable.AudioPlayerView_ap_textColor, textColor)
+        progressPaint.color =
+            a.getColor(R.styleable.AudioPlayerView_ap_progressColor, defaultProgressColor)
+        buttonBgPaint.color =
+            a.getColor(R.styleable.AudioPlayerView_ap_buttonBackgroundColor, defaultButtonBgColor)
+        buttonIconPaint.color =
+            a.getColor(R.styleable.AudioPlayerView_ap_buttonIconColor, defaultButtonIconColor)
+        textPaint.color = a.getColor(R.styleable.AudioPlayerView_ap_textColor, defaultTextColor)
+
 
         progressButtonFilterColor =
             a.getColor(
@@ -108,16 +109,13 @@ class AudioPlayerView : View {
 
     fun setProgressDrawable(progressDrawable: Drawable, filterColor: Int = -1) {
         this.progressButtonDrawable = progressDrawable.apply {
-            val color = if (filterColor >= 0) filterColor else progressButtonFilterColor
-            if (color >= 0) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    colorFilter = PorterDuffColorFilter(
-                        color,
-                        PorterDuff.Mode.SRC_ATOP
-                    )
-                } else {
-                    setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-                }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                colorFilter = PorterDuffColorFilter(
+                    filterColor,
+                    PorterDuff.Mode.SRC_ATOP
+                )
+            } else {
+                setColorFilter(filterColor, PorterDuff.Mode.SRC_ATOP)
             }
         }
     }
@@ -246,7 +244,7 @@ class AudioPlayerView : View {
                     lineTo(btRect.left + delta, btRect.bottom)
                     close()
 
-                    canvas.drawPath(this, buttonPaint)
+                    canvas.drawPath(this, buttonIconPaint)
                 }
             }
             ButtonState.Stop -> {
@@ -258,7 +256,7 @@ class AudioPlayerView : View {
                     bottomLeftRadius = 2.toPx()
                 )
 
-                canvas.drawPath(path, buttonPaint)
+                canvas.drawPath(path, buttonIconPaint)
             }
             ButtonState.Progress -> {
                 val progressDrawable = progressButtonDrawable

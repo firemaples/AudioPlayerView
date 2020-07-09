@@ -12,7 +12,7 @@
         android:layout_width="200dp"
         android:layout_height="40dp"
         app:ap_buttonBackgroundColor="#5acff2"
-        app:ap_buttonIconColor="#fff"
+        app:ap_buttonIconColor="#FFF"
         app:ap_drawingBottomLeftRadius="18dp"
         app:ap_drawingBottomRightRadius="18dp"
         app:ap_drawingTopLeftRadius="18dp"
