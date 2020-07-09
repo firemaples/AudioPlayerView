@@ -21,6 +21,7 @@
         app:ap_progressButtonFilterColor="#FFF"
         app:ap_progressColor="#4c5acff2"
         app:ap_textColor="#000000"
+        app:ap_displayText="12:45"
         app:layout_constraintBottom_toTopOf="@+id/seekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

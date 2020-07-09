@@ -11,5 +11,6 @@
         <attr name="ap_drawingTopRightRadius" format="dimension" />
         <attr name="ap_drawingBottomLeftRadius" format="dimension" />
         <attr name="ap_drawingBottomRightRadius" format="dimension" />
+        <attr name="ap_displayText" format="string" />
     </declare-styleable>
 </resources>

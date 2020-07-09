@@ -30,6 +30,7 @@ class AudioPlayerView : View {
 
     private var progress: Float = 0.5f
     private var buttonState: ButtonState = ButtonState.Play
+    private var displayText: String = ""
 
     private var drawingTopLeftRadius: Float = 0f
     private var drawingTopRightRadius: Float = 0f
@@ -100,6 +101,8 @@ class AudioPlayerView : View {
             a.getDimensionPixelSize(R.styleable.AudioPlayerView_ap_drawingBottomRightRadius, 0)
                 .toFloat()
 
+        displayText = a.getString(R.styleable.AudioPlayerView_ap_displayText) ?: ""
+
         a.recycle()
     }
 
@@ -147,6 +150,11 @@ class AudioPlayerView : View {
         postInvalidate()
     }
 
+    fun updateDisplayText(displayText: String) {
+        this.displayText = displayText
+        postInvalidate()
+    }
+
     private fun startProgressAnimation() {
         mainHandler.postDelayed({
             if (getCurrentButtonState() != ButtonState.Progress) return@postDelayed
@@ -171,7 +179,7 @@ class AudioPlayerView : View {
 
         drawButton(canvas)
 
-        drawText(canvas, "00:06")
+        drawText(canvas, displayText)
     }
 
     private fun clipRegion(canvas: Canvas) {
